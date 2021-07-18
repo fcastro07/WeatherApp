@@ -7,13 +7,13 @@
 
     <fragment
         android:id="@+id/navigation_myLocation"
-        android:name="com.example.weatherapp.ui.myLocation.MyLocationFragment"
+        android:name="com.example.weatherapp.ui.view.MyLocationFragment"
         android:label="@string/title_myLocation"
         tools:layout="@layout/fragment_my_location" />
 
     <fragment
         android:id="@+id/navigation_mapLocation"
-        android:name="com.example.weatherapp.ui.mapLocation.MapLocationFragment"
+        android:name="com.example.weatherapp.ui.view.MapLocationFragment"
         android:label="@string/title_mapLocation"
         tools:layout="@layout/fragment_map_location" />
 </navigation>
