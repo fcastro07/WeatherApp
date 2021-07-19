@@ -9,13 +9,12 @@ import kotlinx.coroutines.launch
 
 class MyLocationViewModel : ViewModel() {
 
-    private val weatherModel = MutableLiveData<WeatherModel>()
+    val weatherModel = MutableLiveData<WeatherModel>()
+    private val getWeather = GetWeather()
 
-    val getWeather = GetWeather()
-
-    fun updateWeather() {
+    fun updateWeather(lat: Double, lon: Double) {
         viewModelScope.launch {
-            val result = getWeather(33.44, -94.04)
+            val result = getWeather(lat, lon)
             if (result != null) {
                 weatherModel.postValue(result!!)
             }
