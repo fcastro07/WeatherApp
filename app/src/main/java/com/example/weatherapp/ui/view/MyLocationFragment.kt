@@ -54,14 +54,21 @@ class MyLocationFragment : Fragment() {
         })
 
         myLocationViewModel.isLoading.observe(viewLifecycleOwner, {
-            binding.loadingProgress.isVisible = it
-            binding.contentPanel.isVisible = !it
+            if(!binding.contentPanel.isVisible) {
+                binding.contentPanel.isVisible = !it
+            }
+
+            binding.contentPanel.isRefreshing = it
         })
+
+        binding.contentPanel.setOnRefreshListener {
+            updateLocation(true)
+        }
 
         return root
     }
 
-    private fun updateLocation() {
+    private fun updateLocation(forceUpdate: Boolean = false) {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         val locationRequest = LocationRequest.create()
         locationRequest.interval = 10000
@@ -97,7 +104,7 @@ class MyLocationFragment : Fragment() {
             override fun onLocationResult(locationResult: LocationResult) {
                 val location: Location? = locationResult.lastLocation
                 if (location != null) {
-                    myLocationViewModel.updateWeather(location.latitude, location.longitude)
+                    myLocationViewModel.updateWeather(location.latitude, location.longitude, forceUpdate)
                     fusedLocationClient.removeLocationUpdates(this)
                 }
             }
