@@ -9,7 +9,8 @@ class OpenWeatherMapRepository {
 
     suspend fun getWeather(lat: Double, lon: Double) : WeatherModel? {
         val response = api.getWeather(lat, lon)
-        WeatherProvider.weather = response
+        response?.daily?.removeAt(0)
+        WeatherProvider.lastMyLocationWeather = response
         return response
     }
 }

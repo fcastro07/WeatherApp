@@ -13,7 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherapp.databinding.FragmentMyLocationBinding
 import com.example.weatherapp.ui.viewmodel.MyLocationViewModel
 import com.google.android.gms.location.LocationCallback
@@ -36,18 +36,28 @@ class MyLocationFragment : Fragment() {
 
         updateLocation()
 
-        myLocationViewModel.weatherModel.observe(viewLifecycleOwner, Observer {
-            binding.currentDegrees.text = "${it.current.temp.toInt()}°"
-            binding.feelsLike.text = "Feels Like: ${it.current.feels_like.toInt()}°"
-            binding.weatherDescription.text = it.current.weather[0].main
+        myLocationViewModel.weatherModel.observe(viewLifecycleOwner, { weather ->
+            binding.currentDegrees.text = "${weather.current.temp.toInt()}°"
+            binding.feelsLike.text = "Feels Like: ${weather.current.feels_like.toInt()}°"
+            binding.weatherDescription.text = weather.current.weather[0].main
             val resourceId: Int = resources.getIdentifier(
-                "w_${it.current.weather[0].icon}",
+                "w_${weather.current.weather[0].icon}",
                 "drawable",
                 context?.packageName
             )
             binding.weatherImage.setImageResource(resourceId)
-            binding.loadingPanel.isVisible = false
+            binding.weekRecyclerView.also {
+                it.layoutManager = LinearLayoutManager(requireContext())
+                it.adapter = WeekAdapter(weather.daily)
+                it.setHasFixedSize(true)
+            }
         })
+
+        myLocationViewModel.isLoading.observe(viewLifecycleOwner, {
+            binding.loadingProgress.isVisible = it
+            binding.contentPanel.isVisible = !it
+        })
+
         return root
     }
 
