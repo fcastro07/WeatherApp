@@ -3,20 +3,31 @@ package com.example.weatherapp.ui.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherapp.data.OpenWeatherMapRepository
 import com.example.weatherapp.data.model.WeatherModel
-import com.example.weatherapp.domain.GetWeather
+import com.example.weatherapp.data.model.WeatherProvider
 import kotlinx.coroutines.launch
 
 class MyLocationViewModel : ViewModel() {
 
-    val weatherModel = MutableLiveData<WeatherModel>()
-    private val getWeather = GetWeather()
+    private val repository = OpenWeatherMapRepository()
 
-    fun updateWeather(lat: Double, lon: Double) {
+    val weatherModel = MutableLiveData<WeatherModel>()
+    val isLoading = MutableLiveData<Boolean>()
+
+    fun updateWeather(lat: Double, lon: Double, forceUpdate: Boolean = false) {
+        isLoading.postValue(true)
+        if (!forceUpdate && WeatherProvider.lastMyLocationWeather != null) {
+            weatherModel.postValue(WeatherProvider.lastMyLocationWeather)
+            isLoading.postValue(false)
+            return
+        }
+
         viewModelScope.launch {
-            val result = getWeather(lat, lon)
+            val result = repository.getWeather(lat, lon)
             if (result != null) {
                 weatherModel.postValue(result!!)
+                isLoading.postValue(false)
             }
         }
     }
