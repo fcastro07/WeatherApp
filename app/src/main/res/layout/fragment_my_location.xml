@@ -92,7 +92,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="Today"
+                        android:text="@string/today"
                         android:textColor="@color/white"
                         android:textSize="20sp"
                         android:textStyle="bold"
@@ -120,22 +120,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="28dp"
                 android:layout_marginTop="16dp"
-                android:text="Next week"
+                android:text="@string/next_week"
                 android:textSize="20sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/cardView" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-<!--    <ProgressBar-->
-<!--        android:id="@+id/loadingProgress"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:indeterminate="true"-->
-<!--        android:visibility="visible"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:visibility="gone" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

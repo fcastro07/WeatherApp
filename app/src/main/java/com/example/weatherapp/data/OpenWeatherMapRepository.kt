@@ -1,16 +1,12 @@
 package com.example.weatherapp.data
 
 import com.example.weatherapp.data.model.WeatherModel
-import com.example.weatherapp.data.model.WeatherProvider
 import com.example.weatherapp.data.network.OpenWeatherMapService
 
 class OpenWeatherMapRepository {
     private val api = OpenWeatherMapService()
 
-    suspend fun getWeather(lat: Double, lon: Double) : WeatherModel? {
-        val response = api.getWeather(lat, lon)
-        response?.daily?.removeAt(0)
-        WeatherProvider.lastMyLocationWeather = response
-        return response
+    suspend fun getWeather(lat: Double, lon: Double): WeatherModel? {
+        return api.getWeather(lat, lon)
     }
 }
