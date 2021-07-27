@@ -1,5 +1,6 @@
 package com.example.weatherapp.core
 
+import com.example.weatherapp.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -22,7 +23,7 @@ object RetrofitHelper {
         val request = chain.request().newBuilder()
         val originalHttpUrl = chain.request().url()
         val newUrl = originalHttpUrl.newBuilder()
-            .addQueryParameter("appid", "6381d4a8de095849e3374a1a7cab0286")
+            .addQueryParameter("appid", BuildConfig.OPENWEATHERMAP_API_KEY)
             .addQueryParameter("exclude", "minutely,hourly,alerts")
             .addQueryParameter("units", "metric")
             .build()

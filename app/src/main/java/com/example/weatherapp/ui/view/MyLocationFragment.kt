@@ -14,12 +14,16 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.weatherapp.R
+import com.example.weatherapp.core.IconHelper
 import com.example.weatherapp.databinding.FragmentMyLocationBinding
+import com.example.weatherapp.ui.view.adapter.WeekAdapter
 import com.example.weatherapp.ui.viewmodel.MyLocationViewModel
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import kotlin.math.roundToInt
 
 class MyLocationFragment : Fragment() {
 
@@ -30,37 +34,13 @@ class MyLocationFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentMyLocationBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         updateLocation()
-
-        myLocationViewModel.weatherModel.observe(viewLifecycleOwner, { weather ->
-            binding.currentDegrees.text = "${weather.current.temp.toInt()}°"
-            binding.feelsLike.text = "Feels Like: ${weather.current.feels_like.toInt()}°"
-            binding.weatherDescription.text = weather.current.weather[0].main
-            val resourceId: Int = resources.getIdentifier(
-                "w_${weather.current.weather[0].icon}",
-                "drawable",
-                context?.packageName
-            )
-            binding.weatherImage.setImageResource(resourceId)
-            binding.weekRecyclerView.also {
-                it.layoutManager = LinearLayoutManager(requireContext())
-                it.adapter = WeekAdapter(weather.daily)
-                it.setHasFixedSize(true)
-            }
-        })
-
-        myLocationViewModel.isLoading.observe(viewLifecycleOwner, {
-            if(!binding.contentPanel.isVisible) {
-                binding.contentPanel.isVisible = !it
-            }
-
-            binding.contentPanel.isRefreshing = it
-        })
-
+        observeWeather()
+        observeIsLoading()
         binding.contentPanel.setOnRefreshListener {
             updateLocation(true)
         }
@@ -70,44 +50,83 @@ class MyLocationFragment : Fragment() {
 
     private fun updateLocation(forceUpdate: Boolean = false) {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            val permissionRequest =
+                registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                    permissions.forEach {
+                        if (!it.value) {
+                            Toast.makeText(
+                                requireActivity(),
+                                getString(R.string.location_required_my_location),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            permissionRequest.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+            return
+        }
+
         val locationRequest = LocationRequest.create()
         locationRequest.interval = 10000
         locationRequest.fastestInterval = 5000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            val permissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-                    permissions ->
-                permissions.forEach {
-                    if (!it.value) {
-                        Toast.makeText(
-                            requireActivity(),
-                            "Location permission is required to show weather in your location",
-                            Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-            permissionRequest.launch(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION))
-            return
-        }
-
         fusedLocationClient.requestLocationUpdates(locationRequest, object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 val location: Location? = locationResult.lastLocation
                 if (location != null) {
-                    myLocationViewModel.updateWeather(location.latitude, location.longitude, forceUpdate)
+                    myLocationViewModel.updateWeather(
+                        location.latitude,
+                        location.longitude,
+                        forceUpdate
+                    )
                     fusedLocationClient.removeLocationUpdates(this)
                 }
             }
         }, null)
+    }
+
+    private fun observeWeather() {
+        myLocationViewModel.weather.observe(viewLifecycleOwner, { weather ->
+            val current = weather.current
+            binding.todayWeather.also {
+                it.currentDegrees.text = getString(R.string.degrees, current.temp.roundToInt())
+                it.feelsLike.text = getString(R.string.feels_like, current.feels_like.roundToInt())
+                it.weatherDescription.text = current.weather[0].main
+                val resourceId =
+                    IconHelper.getSVGResourceId(current.weather[0].icon, requireContext())
+                it.weatherImage.setImageResource(resourceId)
+            }
+
+            binding.weekRecyclerView.also {
+                it.layoutManager = LinearLayoutManager(requireContext())
+                it.adapter = WeekAdapter(weather.daily)
+                it.setHasFixedSize(true)
+            }
+        })
+    }
+
+    private fun observeIsLoading() {
+        myLocationViewModel.isLoading.observe(viewLifecycleOwner, {
+            if (!binding.contentPanel.isVisible) {
+                binding.contentPanel.isVisible = !it
+            }
+
+            binding.contentPanel.isRefreshing = it
+        })
     }
 }

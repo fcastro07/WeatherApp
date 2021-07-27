@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.FragmentMapLocationBinding
+import com.example.weatherapp.ui.view.adapter.WeatherInfoWindowAdapter
 import com.example.weatherapp.ui.viewmodel.MapLocationViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -28,8 +29,8 @@ class MapLocationFragment : Fragment(), OnMapReadyCallback {
     private lateinit var binding: FragmentMapLocationBinding
     private lateinit var map: GoogleMap
     private val mapLocationViewModel: MapLocationViewModel by viewModels()
-    private var hasLocationPermission : Boolean = false
-    private var currentMarkerWeather : Marker? = null
+    private var hasLocationPermission: Boolean = false
+    private var currentMarkerWeather: Marker? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,20 +46,24 @@ class MapLocationFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun requestPermissions() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED) {
-            val permissionRequest = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-                if (!it) {
-                    Toast.makeText(
-                        requireActivity(),
-                        "Location permission is required to show your location",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    hasLocationPermission = true
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            val permissionRequest =
+                registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+                    if (!it) {
+                        Toast.makeText(
+                            requireActivity(),
+                            getString(R.string.location_required_my_location),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        hasLocationPermission = true
+                    }
                 }
-            }
-
             permissionRequest.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             hasLocationPermission = true
@@ -66,8 +71,8 @@ class MapLocationFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun createMapFragment() {
-        val mapFragment = childFragmentManager.
-            findFragmentById(R.id.fragmentMap) as SupportMapFragment
+        val mapFragment =
+            childFragmentManager.findFragmentById(R.id.fragmentMap) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
@@ -78,7 +83,7 @@ class MapLocationFragment : Fragment(), OnMapReadyCallback {
             map.setInfoWindowAdapter(markerInfoWindowAdapter)
             val position = mapLocationViewModel.location.value!!
             currentMarkerWeather = map.addMarker(MarkerOptions().position(position))
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 18F))
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 10F))
             currentMarkerWeather?.showInfoWindow()
         })
     }

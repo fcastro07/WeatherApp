@@ -4,4 +4,10 @@
     <string name="title_mapLocation">Map location</string>
     <string name="today">Today</string>
     <string name="next_week">Next week</string>
+    <string name="degrees">%1$d°</string>
+    <string name="max_degrees">↑%1$d°</string>
+    <string name="min_degrees">↓%1$d°</string>
+    <string name="feels_like">Feels like %1$d°</string>
+    <string name="location_required_my_location">Location permission is required to show weather in your location</string>
+    <string name="location_required_map_location">Location permission is required to show your location in the map</string>
 </resources>

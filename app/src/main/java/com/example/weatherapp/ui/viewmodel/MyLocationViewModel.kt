@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,14 +13,17 @@ class MyLocationViewModel : ViewModel() {
 
     private val repository = OpenWeatherMapRepository()
 
-    val weatherModel = MutableLiveData<WeatherModel>()
-    val isLoading = MutableLiveData<Boolean>()
+    private val _weather = MutableLiveData<WeatherModel>()
+    val weather: LiveData<WeatherModel> = _weather
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
 
     fun updateWeather(lat: Double, lon: Double, forceUpdate: Boolean = false) {
-        isLoading.postValue(true)
+        _isLoading.postValue(true)
         if (!forceUpdate && WeatherProvider.lastMyLocationWeather != null) {
-            weatherModel.postValue(WeatherProvider.lastMyLocationWeather)
-            isLoading.postValue(false)
+            _weather.postValue(WeatherProvider.lastMyLocationWeather)
+            _isLoading.postValue(false)
             return
         }
 
@@ -28,8 +32,8 @@ class MyLocationViewModel : ViewModel() {
             if (result != null) {
                 result.daily.removeAt(0)
                 WeatherProvider.lastMyLocationWeather = result
-                weatherModel.postValue(result!!)
-                isLoading.postValue(false)
+                _weather.postValue(result!!)
+                _isLoading.postValue(false)
             }
         }
     }
