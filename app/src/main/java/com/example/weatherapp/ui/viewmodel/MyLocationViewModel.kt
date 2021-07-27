@@ -26,6 +26,8 @@ class MyLocationViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.getWeather(lat, lon)
             if (result != null) {
+                result.daily.removeAt(0)
+                WeatherProvider.lastMyLocationWeather = result
                 weatherModel.postValue(result!!)
                 isLoading.postValue(false)
             }
