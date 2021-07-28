@@ -1,7 +1,7 @@
 package com.example.weatherapp.ui.view
 
 import android.Manifest
-import android.content.pm.PackageManager
+import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -38,7 +37,7 @@ class MyLocationFragment : Fragment() {
         binding = FragmentMyLocationBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        updateLocation()
+        requestLocationPermissions()
         observeWeather()
         observeIsLoading()
         binding.contentPanel.setOnRefreshListener {
@@ -48,43 +47,35 @@ class MyLocationFragment : Fragment() {
         return root
     }
 
-    private fun updateLocation(forceUpdate: Boolean = false) {
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-            )
-            != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            val permissionRequest =
-                registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                    permissions.forEach {
-                        if (!it.value) {
-                            Toast.makeText(
-                                requireActivity(),
-                                getString(R.string.location_required_my_location),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+    private fun requestLocationPermissions() {
+        val permissionRequest =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                val allPermissionGranted = permissions.values.all { p -> p == true }
+                if (allPermissionGranted) {
+                    updateLocation()
+                } else {
+                    Toast.makeText(
+                        requireActivity(),
+                        getString(R.string.location_required_my_location),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            permissionRequest.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
+            }
+        permissionRequest.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             )
-            return
-        }
+        )
+    }
 
+    @SuppressLint("MissingPermission")
+    private fun updateLocation(forceUpdate: Boolean = false) {
         val locationRequest = LocationRequest.create()
         locationRequest.interval = 10000
         locationRequest.fastestInterval = 5000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         fusedLocationClient.requestLocationUpdates(locationRequest, object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 val location: Location? = locationResult.lastLocation
