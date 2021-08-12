@@ -15,6 +15,8 @@ WeatherApp is just an Android simple weather app developed in Kotlin using OpenW
 * OpenWeatherMap [One Call API](https://openweathermap.org/api/one-call-api) to get current weather
 * [Maps SDK for Android](https://developers.google.com/maps/documentation/android-sdk/overview)
 * MVVM architecture
+* Clean architecture
+* Dependency injection with [Dagger Hilt](https://dagger.dev/hilt/)
 * Coroutines
 
 ### Requirements
