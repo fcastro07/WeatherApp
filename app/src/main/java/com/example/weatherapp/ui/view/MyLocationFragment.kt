@@ -22,8 +22,10 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.roundToInt
 
+@AndroidEntryPoint
 class MyLocationFragment : Fragment() {
 
     private lateinit var binding: FragmentMyLocationBinding

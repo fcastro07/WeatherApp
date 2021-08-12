@@ -4,14 +4,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherapp.data.OpenWeatherMapRepository
 import com.example.weatherapp.data.model.WeatherModel
+import com.example.weatherapp.domain.GetWeatherOfLocation
 import com.google.android.gms.maps.model.LatLng
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MapLocationViewModel : ViewModel() {
-
-    private val repository = OpenWeatherMapRepository()
+@HiltViewModel
+class MapLocationViewModel @Inject constructor(
+    private val getWeatherOfLocation : GetWeatherOfLocation
+) : ViewModel() {
 
     private val _weather = MutableLiveData<WeatherModel>()
     val weather: LiveData<WeatherModel> = _weather
@@ -21,10 +24,10 @@ class MapLocationViewModel : ViewModel() {
 
     fun updateWeather(lat: Double, lon: Double) {
         viewModelScope.launch {
-            val result = repository.getWeather(lat, lon)
-            if (result != null) {
+            val result = getWeatherOfLocation(lat, lon)
+            result?.also {
                 _location.postValue(LatLng(lat, lon))
-                _weather.postValue(result!!)
+                _weather.postValue(it)
             }
         }
     }
